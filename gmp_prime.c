@@ -1,3 +1,4 @@
+// #gcc gmp_prime.c -O3 -lgmp -lm -o gmp_prime
 #include <stdio.h>
 #include <gmp.h>
 #include <stdlib.h>
