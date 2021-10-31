@@ -3,8 +3,6 @@
 #include <gmp.h>
 #include <stdlib.h>
 
-//0, 2, 4, 2, 4, 6, 2, 6, 4
-
 int main(int argc, char *argv[])
 {
     mpz_t res;
@@ -13,39 +11,63 @@ int main(int argc, char *argv[])
     mpz_init (start);
     mpz_t range;
     mpz_init (range);
-    int check[] = {0, 2, 4, 2, 4, 6, 2, 6, 4};
+    unsigned int check[] = {2, 4, 2, 4, 6, 2, 6, 4};
+    unsigned int check2[] = {2, 6, 4, 2, 4, 2};
     mpz_t next;
     mpz_init (next);
     int cur=0;
+    int cur2=0;
 
     if ( argc < 3)
         exit(1);
 
     mpz_set_str (start,argv[1],0);
     mpz_set_str (range,argv[2],0);
-    mpz_set(next,start);
+
 
     while( mpz_cmp(res,range) <  0)
     {
-
+        mpz_set(next,start);
         mpz_nextprime (res, start);
-
         mpz_add_ui(next,next,check[cur]);
-        if ( mpz_cmp(res,next) == 0 )
-            cur++;
-        else
-            cur=0;
+        //gmp_printf("%#Zu\n%#Zu\n\n",res,next);
 
-        if ( cur == 7 )
+        if ( mpz_cmp(res,next) == 0 )
+        {
+            printf(".");
+            cur++;
+        }else{
+            if ( cur > 0 )
+            {
+                printf("\n");
+                cur=0;
+            }
+        }
+
+        mpz_set(next,start);
+        mpz_add_ui(next,next,check2[cur2]);
+
+        if ( mpz_cmp(res,next) == 0 )
+        {
+            printf(".");
+            cur2++;
+        }else{
+            if ( cur2> 0 )
+            {
+                printf("\n");
+                cur2=0;
+            }
+        }
+
+        if ( cur == 6 )
         {
             gmp_printf("7 Tuple found %#Zx\n",res);
             exit(0);
         }
 
-        mpz_set(next,res);
         mpz_set(start,res);
     }
 
-    return(gmp_printf("Reached limit %#Zx\n",res));
+    return(0);
 }
 
