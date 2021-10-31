@@ -37,11 +37,7 @@ int main(int argc, char *argv[])
             printf(".");
             cur++;
         }else{
-            if ( cur > 0 )
-            {
-                printf("\n");
-                cur=0;
-            }
+            cur=0;
         }
 
         mpz_set(next,start);
@@ -55,8 +51,8 @@ int main(int argc, char *argv[])
             if ( cur2 > 0 )
             {
                 printf("\n");
-                cur2=0;
             }
+            cur2=0;
         }
 
         if ( ( cur == 5 ) || ( cur2 == 5 ) )
