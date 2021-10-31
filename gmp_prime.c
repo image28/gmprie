@@ -52,14 +52,14 @@ int main(int argc, char *argv[])
             printf(".");
             cur2++;
         }else{
-            if ( cur2> 0 )
+            if ( cur2 > 0 )
             {
                 printf("\n");
                 cur2=0;
             }
         }
 
-        if ( cur == 6 )
+        if ( ( cur == 5 ) || ( cur2 == 5 ) )
         {
             gmp_printf("7 Tuple found %#Zx\n",res);
             exit(0);
