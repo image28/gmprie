@@ -9,27 +9,9 @@
 #include <gmp.h>
 
 #define THREADS 8
-#define DEBUG 1
+#define DEBUG 0
 
 int manager(pid_t *pids, int *count);
-
-int manager(pid_t *pids, int *count)
-{
-    if ((*(pids+*(count)) = fork()) < 0) {
-        perror("Fork failed");
-        return(-1);
-    }else if (*(pids+*(count)) != 0) {
-        *(count)=*(count)+1;
-        if ( *(count) < THREADS )
-        {
-            manager(pids, count);
-            return(1);
-        }
-    }else{
-        //printf("%d ",*(count));
-        return(0);
-    }
-}
 
 int main(int argc, char *argv[])
 {
@@ -65,6 +47,55 @@ int main(int argc, char *argv[])
 
     ismanager=manager(&pids[0], &count);
 
+    mpz_mul_ui(range,range,count+1);
+    mpz_add(start,start,range);
+    mpz_add(range,range,start);
+
+    while( mpz_cmp(res,range) <  0)
+    {
+        mpz_set(next,start);
+        mpz_nextprime (res, start);
+        mpz_add_ui(next,next,check[cur]);
+        //gmp_printf("%#Zu\n%#Zu\n\n",res,next);
+
+        if ( mpz_cmp(res,next) == 0 )
+        {
+        #ifdef DEBUG
+            printf(".");
+        #endif
+            cur++;
+        }else{
+            cur=0;
+        }
+
+        mpz_set(next,start);
+        mpz_add_ui(next,next,check2[cur2]);
+
+        if ( mpz_cmp(res,next) == 0 )
+        {
+        #ifdef DEBUG
+            printf(".");
+        #endif
+            cur2++;
+        }else{
+        #ifdef DEBUG
+            if ( cur2 > 0 )
+            {
+                printf("\n");
+            }
+        #endif
+            cur2=0;
+        }
+
+        if ( ( cur == 6 ) || ( cur2 == 6 ) )
+        {
+            gmp_printf("7 Tuple found %#Zx\n",res);
+            exit(0);
+        }
+
+        mpz_set(start,res);
+    }
+
     if ( ( ismanager ) && ( count == THREADS ) )
     {
 
@@ -85,58 +116,26 @@ int main(int argc, char *argv[])
         printf("\n");
         waitpid(-1,NULL,0);
     }
-    else if ( ! ismanager )
-    {
-        mpz_mul_ui(range,range,count);
-        mpz_add(start,start,range);
-        mpz_add(range,range,start);
 
-        while( mpz_cmp(res,range) <  0)
-        {
-            mpz_set(next,start);
-            mpz_nextprime (res, start);
-            mpz_add_ui(next,next,check[cur]);
-            //gmp_printf("%#Zu\n%#Zu\n\n",res,next);
-
-            if ( mpz_cmp(res,next) == 0 )
-            {
-            #ifdef DEBUG
-                printf(".");
-            #endif
-                cur++;
-            }else{
-                cur=0;
-            }
-
-            mpz_set(next,start);
-            mpz_add_ui(next,next,check2[cur2]);
-
-            if ( mpz_cmp(res,next) == 0 )
-            {
-            #ifdef DEBUG
-                printf(".");
-            #endif
-                cur2++;
-            }else{
-            #ifdef DEBUG
-                if ( cur2 > 0 )
-                {
-                    printf("\n");
-                }
-            #endif
-                cur2=0;
-            }
-
-            if ( ( cur == 6 ) || ( cur2 == 6 ) )
-            {
-                gmp_printf("7 Tuple found %#Zx\n",res);
-                exit(0);
-            }
-
-            mpz_set(start,res);
-        }
-    }
+    gmp_printf("Limit Reached %#Zd\nThread %d exited\n\n",res,count);
 
     return(0);
 }
 
+int manager(pid_t *pids, int *count)
+{
+    if ((*(pids+*(count)) = fork()) < 0) {
+        perror("Fork failed");
+        return(-1);
+    }else if (*(pids+*(count)) != 0) {
+        *(count)=*(count)+1;
+        if ( *(count) < THREADS )
+        {
+            manager(pids, count);
+            return(1);
+        }
+    }else{
+        //printf("%d ",*(count));
+        return(0);
+    }
+}
