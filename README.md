@@ -1,5 +1,4 @@
-# gmprie
-unfinished libgmp riecoin client
+# gmprie - unfinished libgmp riecoin client
 
 Compile with 
 
