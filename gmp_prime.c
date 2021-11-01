@@ -1,7 +1,35 @@
 // #gcc gmp_prime.c -O3 -lgmp -lm -o gmp_prime
 #include <stdio.h>
-#include <gmp.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/syscall.h>
+#include <gmp.h>
+
+#define THREADS 8
+#define DEBUG 1
+
+int manager(pid_t *pids, int *count);
+
+int manager(pid_t *pids, int *count)
+{
+    if ((*(pids+*(count)) = fork()) < 0) {
+        perror("Fork failed");
+        return(-1);
+    }else if (*(pids+*(count)) != 0) {
+        *(count)=*(count)+1;
+        if ( *(count) < THREADS )
+        {
+            manager(pids, count);
+            return(1);
+        }
+    }else{
+        //printf("%d ",*(count));
+        return(0);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -17,51 +45,96 @@ int main(int argc, char *argv[])
     mpz_init (next);
     int cur=0;
     int cur2=0;
+    unsigned long offset=12;
+    int count = 0; // This countiable is created on the stack
+    pid_t pids[THREADS];
+    int ismanager=0;
+    int i=0;
+    int e=0;
 
-    if ( argc < 3)
+
+    if ( argc < 2)
         exit(1);
 
     mpz_set_str (start,argv[1],0);
-    mpz_set_str (range,argv[2],0);
-
-
-    while( mpz_cmp(res,range) <  0)
+    mpz_add_ui(range,range,10);
+    for(i=0; i < offset;i++)
     {
-        mpz_set(next,start);
-        mpz_nextprime (res, start);
-        mpz_add_ui(next,next,check[cur]);
-        //gmp_printf("%#Zu\n%#Zu\n\n",res,next);
+        mpz_mul_ui(range,range,10);
+    }
 
-        if ( mpz_cmp(res,next) == 0 )
+    ismanager=manager(&pids[0], &count);
+
+    if ( ( ismanager ) && ( count == THREADS ) )
+    {
+
+        for(i=0; i < THREADS; i++)
         {
-            printf(".");
-            cur++;
-        }else{
-            cur=0;
-        }
-
-        mpz_set(next,start);
-        mpz_add_ui(next,next,check2[cur2]);
-
-        if ( mpz_cmp(res,next) == 0 )
-        {
-            printf(".");
-            cur2++;
-        }else{
-            if ( cur2 > 0 )
+            mpz_set_str (start,argv[1],0);
+            mpz_set_str (range,"0",0);
+            mpz_add_ui(range,range,10);
+            for(e=0; e < offset;e++)
             {
-                printf("\n");
+                mpz_mul_ui(range,range,10);
             }
-            cur2=0;
+            mpz_mul_ui(range,range,i);
+            mpz_add(start,start,range);
+            mpz_add(range,range,start);
+            gmp_printf("Thread:\n%d\nStart:\n%Zd\nEnd:\n%Zd\n",i,start,range);
         }
+        printf("\n");
+        waitpid(-1,NULL,0);
+    }
+    else if ( ! ismanager )
+    {
+        mpz_mul_ui(range,range,count);
+        mpz_add(start,start,range);
+        mpz_add(range,range,start);
 
-        if ( ( cur == 5 ) || ( cur2 == 5 ) )
+        while( mpz_cmp(res,range) <  0)
         {
-            gmp_printf("7 Tuple found %#Zx\n",res);
-            exit(0);
-        }
+            mpz_set(next,start);
+            mpz_nextprime (res, start);
+            mpz_add_ui(next,next,check[cur]);
+            //gmp_printf("%#Zu\n%#Zu\n\n",res,next);
 
-        mpz_set(start,res);
+            if ( mpz_cmp(res,next) == 0 )
+            {
+            #ifdef DEBUG
+                printf(".");
+            #endif
+                cur++;
+            }else{
+                cur=0;
+            }
+
+            mpz_set(next,start);
+            mpz_add_ui(next,next,check2[cur2]);
+
+            if ( mpz_cmp(res,next) == 0 )
+            {
+            #ifdef DEBUG
+                printf(".");
+            #endif
+                cur2++;
+            }else{
+            #ifdef DEBUG
+                if ( cur2 > 0 )
+                {
+                    printf("\n");
+                }
+            #endif
+                cur2=0;
+            }
+
+            if ( ( cur == 6 ) || ( cur2 == 6 ) )
+            {
+                gmp_printf("7 Tuple found %#Zx\n",res);
+                exit(0);
+            }
+
+            mpz_set(start,res);
+        }
     }
 
     return(0);
