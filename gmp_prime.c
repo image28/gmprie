@@ -9,7 +9,6 @@
 #include <gmp.h>
 
 #define THREADS 8
-#define DEBUG 0
 
 int manager(pid_t *pids, int *count);
 
