@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 
         if ( ( cur == 6 ) || ( cur2 == 6 ) )
         {
-            gmp_printf("7 Tuple found %#Zx\n",res);
+            gmp_printf("BLOCK:%#Zx\n",res);
             exit(0);
         }
 
