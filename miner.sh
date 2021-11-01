@@ -12,7 +12,7 @@ CURTIME=`cat .worklog-$DATE | grep -iEo "curtime\":[0-9]*" | awk -F':' '{print $
 #  2^(Difficulty - 80)(2^80 + 2^64*L + 2^32*Height + Requests)
 #DIFF=
 # Mine a block
-#OUTPUT=`./gmp_prime $DIFF $LIMIT`
+#OUTPUT=`./gmp_prime $DIFF | grep -iEo "BLOCK:[A-Z0-9]{1,} | awk -F':' 'print $1'}`
 
 # Submit the block
 #echo -ne "$SUBMIT" | \
