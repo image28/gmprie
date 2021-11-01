@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     mpz_init (next);
     int cur=0;
     int cur2=0;
-    unsigned long offset=12;
+    unsigned long offset=9;
     int count = 0; // This countiable is created on the stack
     pid_t pids[THREADS];
     int ismanager=0;
